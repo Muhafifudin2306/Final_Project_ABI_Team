@@ -16,159 +16,523 @@
 
 #include <stdlib.h>
 
-static int slices = 16;
-static int stacks = 16;
+//Deklarasi fungsi Mouse agar gambar 3d dapat diputar putar menggunakan Mouse
+float xrot =0;
+float yrot = 0;
+float xdiff = 0;
+float ydiff = 0;
+bool mouseDown = false;
 
-/* GLUT callback Handlers */
 
-static void resize(int width, int height)
-{
-    const float ar = (float) width / (float) height;
 
-    glViewport(0, 0, width, height);
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    glFrustum(-ar, ar, -1.0, 1.0, 2.0, 100.0);
 
-    glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity() ;
+//Deklarasi pengaturan lembaran kerja agar Gambar 3d yang kita buat saat diputar atau di geser tidak kemana mana
+void ukur(int lebar, int tinggi){
+if(tinggi==0) tinggi=1;
+glMatrixMode(GL_PROJECTION);
+glLoadIdentity();
+gluPerspective(45,lebar/tinggi, 5, 450);
+glTranslatef(0,0,-300);// jarak object dari lembaran kerja
+glMatrixMode(GL_MODELVIEW);
+}
+void myinit(void){
+glClearColor (0.0, 0.0, 0.0, 0.0);
+glMatrixMode(GL_PROJECTION);
+glEnable(GL_DEPTH_TEST);
+
+glMatrixMode(GL_MODELVIEW);
+glPointSize(10.0);
+glLineWidth(7.0f);
 }
 
-static void display(void)
+//Dan selanjutnya yaitu fungsi mouse
+void idle()
 {
-    const double t = glutGet(GLUT_ELAPSED_TIME) / 1000.0;
-    const double a = t*90.0;
+if (!mouseDown)
+{
+xrot += 0.3;
+yrot += 0.4;
+}
+glutPostRedisplay();
+}
 
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glColor3d(1,0,0);
+void mouse(int button, int state, int x, int y)
+{
+if(button == GLUT_LEFT_BUTTON && state == GLUT_DOWN)
+{
+mouseDown = true;
+xdiff = x - yrot;
+ydiff = -y + xrot;
+}
+else
+mouseDown = false;
+}
 
-    glPushMatrix();
-        glTranslated(-2.4,1.2,-6);
-        glRotated(60,1,0,0);
-        glRotated(a,0,0,1);
-        glutSolidSphere(1,slices,stacks);
-    glPopMatrix();
+void mouseMotion(int x, int y)
+{
+if(mouseDown)
+{
+yrot = x - xdiff;
+xrot = y + ydiff;
+glutPostRedisplay();
+}
+}
 
-    glPushMatrix();
-        glTranslated(0,1.2,-6);
-        glRotated(60,1,0,0);
-        glRotated(a,0,0,1);
-        glutSolidCone(1,1,slices,stacks);
-    glPopMatrix();
+//Dibawah ini dimulai koding untuk membuat object
+void tampilan(void){
+glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+glLoadIdentity();
+gluLookAt(0,0,3,0,0,0,0,1,0);
+glRotatef(xrot, 1, 0,0);
+glRotatef(yrot, 0,1,0);
+glPushMatrix();
 
-    glPushMatrix();
-        glTranslated(2.4,1.2,-6);
-        glRotated(60,1,0,0);
-        glRotated(a,0,0,1);
-        glutSolidTorus(0.2,0.8,slices,stacks);
-    glPopMatrix();
 
-    glPushMatrix();
-        glTranslated(-2.4,-1.2,-6);
-        glRotated(60,1,0,0);
-        glRotated(a,0,0,1);
-        glutWireSphere(1,slices,stacks);
-    glPopMatrix();
+//ALAS MEJA
+glBegin(GL_POLYGON);//ATAS
+glColor3f(1,1,0);
+glVertex3f(-50,15,40);
+glVertex3f(50,15,40);
+glVertex3f(50,15,-10);
+glVertex3f(-50,15,-10);
+glEnd();
+glBegin(GL_POLYGON);//BAWAH
+glColor3f(1,1,1);
+glVertex3f(-50,10,40);
+glVertex3f(50,10,40);
+glVertex3f(50,10,-10);
+glVertex3f(-50,10,-10);
+glEnd();
+glBegin(GL_POLYGON);//SAMPING KANAN
+glColor3f(0,1,1);
+glVertex3f(50,10,40);
+glVertex3f(50,15,40);
+glVertex3f(50,15,-10);
+glVertex3f(50,10,-10);
+glEnd();
+glBegin(GL_POLYGON);//SAMPING KIRI
+glColor3f(0,1,1);
+glVertex3f(-50,10,40);
+glVertex3f(-50,15,40);
+glVertex3f(-50,15,-10);
+glVertex3f(-50,10,-10);
+glEnd();
+glBegin(GL_POLYGON);//DEPAN
+glColor3f(0,0,1);
+glVertex3f(-50,10,40);
+glVertex3f(-50,15,40);
+glVertex3f(50,15,40);
+glVertex3f(50,10,40);
+glEnd();
+glBegin(GL_POLYGON);//BELAKANG
+glColor3f(0,0,1);
+glVertex3f(-50,10,-10);
+glVertex3f(-50,15,-10);
+glVertex3f(50,15,-10);
+glVertex3f(50,10,-10);
+glEnd();
 
-    glPushMatrix();
-        glTranslated(0,-1.2,-6);
-        glRotated(60,1,0,0);
-        glRotated(a,0,0,1);
-        glutWireCone(1,1,slices,stacks);
-    glPopMatrix();
+//KAKI MEJA 1
+glBegin(GL_POLYGON);//ALAS BAWAH
+glColor3f(1,1,1);
+glVertex3f(-50,-40,30);
+glVertex3f(-40,-40,30);
+glVertex3f(-40,-40,40);
+glVertex3f(-50,-40,40);
+glEnd();
+glBegin(GL_POLYGON);//DEPAN
+glColor3f(0,0,1);
+glVertex3f(-50,10,40);
+glVertex3f(-40,10,40);
+glVertex3f(-40,-40,40);
+glVertex3f(-50,-40,40);
+glEnd();
+glBegin(GL_POLYGON);//BELAKANG
+glColor3f(0,0,1);
+glVertex3f(-50,10,30);
+glVertex3f(-40,10,30);
+glVertex3f(-40,-40,30);
+glVertex3f(-50,-40,30);
+glEnd();
+glBegin(GL_POLYGON);//KIRI
+glColor3f(0,1,1);
+glVertex3f(-50,10,30);
+glVertex3f(-50,-40,30);
+glVertex3f(-50,-40,40);
+glVertex3f(-50,10,40);
+glEnd();
+glBegin(GL_POLYGON);//KANAN
+glColor3f(0,1,1);
+glVertex3f(-40,10,30);
+glVertex3f(-40,-40,30);
+glVertex3f(-40,-40,40);
+glVertex3f(-40,10,40);
+glEnd();
 
-    glPushMatrix();
-        glTranslated(2.4,-1.2,-6);
-        glRotated(60,1,0,0);
-        glRotated(a,0,0,1);
-        glutWireTorus(0.2,0.8,slices,stacks);
-    glPopMatrix();
+//KAKI MEJA 2
+glBegin(GL_POLYGON);//ALAS BAWAH
+glColor3f(1,1,1);
+glVertex3f(50,-40,30);
+glVertex3f(40,-40,30);
+glVertex3f(40,-40,40);
+glVertex3f(50,-40,40);
+glEnd();
+glBegin(GL_POLYGON);//DEPAN
+glColor3f(0,0,1);
+glVertex3f(50,10,40);
+glVertex3f(40,10,40);
+glVertex3f(40,-40,40);
+glVertex3f(50,-40,40);
+glEnd();
+glBegin(GL_POLYGON);//BELAKANG
+glColor3f(0,0,1);
+glVertex3f(50,10,30);
+glVertex3f(40,10,30);
+glVertex3f(40,-40,30);
+glVertex3f(50,-40,30);
+glEnd();
+glBegin(GL_POLYGON);//KIRI
+glColor3f(0,1,1);
+glVertex3f(50,10,30);
+glVertex3f(50,-40,30);
+glVertex3f(50,-40,40);
+glVertex3f(50,10,40);
+glEnd();
+glBegin(GL_POLYGON);//KANAN
+glColor3f(0,1,1);
+glVertex3f(40,10,30);
+glVertex3f(40,-40,30);
+glVertex3f(40,-40,40);
+glVertex3f(40,10,40);
+glEnd();
 
-    glutSwapBuffers();
+//KAKI MEJA 3
+glBegin(GL_POLYGON);//ALAS BAWAH
+glColor3f(1,1,1);
+glVertex3f(-50,-40,0);
+glVertex3f(-40,-40,0);
+glVertex3f(-40,-40,-10);
+glVertex3f(-50,-40,-10);
+glEnd();
+glBegin(GL_POLYGON);//DEPAN
+glColor3f(0,0,1);
+glVertex3f(-50,10,0);
+glVertex3f(-40,10,0);
+glVertex3f(-40,-40,0);
+glVertex3f(-50,-40,0);
+glEnd();
+glBegin(GL_POLYGON);//BELAKANG
+glColor3f(0,0,1);
+glVertex3f(-50,10,-10);
+glVertex3f(-40,10,-10);
+glVertex3f(-40,-40,-10);
+glVertex3f(-50,-40,-10);
+glEnd();
+glBegin(GL_POLYGON);//KIRI
+glColor3f(0,1,1);
+glVertex3f(-50,10,0);
+glVertex3f(-50,-40,0);
+glVertex3f(-50,-40,-10);
+glVertex3f(-50,10,-10);
+glEnd();
+glBegin(GL_POLYGON);//KANAN
+glColor3f(0,1,1);
+glVertex3f(-40,10,0);
+glVertex3f(-40,-40,0);
+glVertex3f(-40,-40,-10);
+glVertex3f(-40,10,-10);
+glEnd();
+
+//KAKI MEJA 4
+glBegin(GL_POLYGON);//ALAS BAWAH
+glColor3f(1,1,1);
+glVertex3f(50,-40,0);
+glVertex3f(40,-40,0);
+glVertex3f(40,-40,-10);
+glVertex3f(50,-40,-10);
+glEnd();
+glBegin(GL_POLYGON);//DEPAN
+glColor3f(0,0,1);
+glVertex3f(50,10,0);
+glVertex3f(40,10,0);
+glVertex3f(40,-40,0);
+glVertex3f(50,-40,0);
+glEnd();
+glBegin(GL_POLYGON);//BELAKANG
+glColor3f(0,0,1);
+glVertex3f(50,10,-10);
+glVertex3f(40,10,-10);
+glVertex3f(40,-40,-10);
+glVertex3f(50,-40,-10);
+glEnd();
+glBegin(GL_POLYGON);//KIRI
+glColor3f(0,1,1);
+glVertex3f(50,10,0);
+glVertex3f(50,-40,0);
+glVertex3f(50,-40,-10);
+glVertex3f(50,10,-10);
+glEnd();
+glBegin(GL_POLYGON);//KANAN
+glColor3f(0,1,1);
+glVertex3f(40,10,0);
+glVertex3f(40,-40,0);
+glVertex3f(40,-40,-10);
+glVertex3f(40,10,-10);
+glEnd();
+
+//ALAS KURSI
+glBegin(GL_POLYGON);//ATAS
+glColor3f(1,1,0);
+glVertex3f(-20,-15,-20);
+glVertex3f(20,-15,-20);
+glVertex3f(20,-15,-50);
+glVertex3f(-20,-15,-50);
+glEnd();
+glBegin(GL_POLYGON);//BAWAH
+glColor3f(1,1,1);
+glVertex3f(-20,-10,-20);
+glVertex3f(20,-10,-20);
+glVertex3f(20,-10,-50);
+glVertex3f(-20,-10,-50);
+glEnd();
+glBegin(GL_POLYGON);//SAMPING KANAN
+glColor3f(0,1,1);
+glVertex3f(20,-10,-20);
+glVertex3f(20,-15,-20);
+glVertex3f(20,-15,-50);
+glVertex3f(20,-10,-50);
+glEnd();
+glBegin(GL_POLYGON);//SAMPING KIRI
+glColor3f(0,1,1);
+glVertex3f(-20,-10,-20);
+glVertex3f(-20,-15,-20);
+glVertex3f(-20,-15,-50);
+glVertex3f(-20,-10,-50);
+glEnd();
+glBegin(GL_POLYGON);//DEPAN
+glColor3f(0,0,1);
+glVertex3f(-20,-10,-20);
+glVertex3f(-20,-15,-20);
+glVertex3f(20,-15,-20);
+glVertex3f(20,-10,-20);
+glEnd();
+glBegin(GL_POLYGON);//BELAKANG
+glColor3f(0,0,1);
+glVertex3f(-20,-10,-50);
+glVertex3f(-20,-15,-50);
+glVertex3f(20,-15,-50);
+glVertex3f(20,-10,-50);
+glEnd();
+
+//KAKI KURSI 1
+glBegin(GL_POLYGON);//ALAS BAWAH
+glColor3f(1,1,1);
+glVertex3f(-20,-40,-30);
+glVertex3f(-10,-40,-30);
+glVertex3f(-10,-40,-20);
+glVertex3f(-20,-40,-20);
+glEnd();
+glBegin(GL_POLYGON);//DEPAN
+glColor3f(0,0,1);
+glVertex3f(-20,-10,-20);
+glVertex3f(-10,-10,-20);
+glVertex3f(-10,-40,-20);
+glVertex3f(-20,-40,-20);
+glEnd();
+glBegin(GL_POLYGON);//BELAKANG
+glColor3f(0,0,1);
+glVertex3f(-20,-10,-30);
+glVertex3f(-10,-10,-30);
+glVertex3f(-10,-40,-30);
+glVertex3f(-20,-40,-30);
+glEnd();
+glBegin(GL_POLYGON);//KIRI
+glColor3f(0,1,1);
+glVertex3f(-20,-10,-30);
+glVertex3f(-20,-40,-30);
+glVertex3f(-20,-40,-20);
+glVertex3f(-20,-10,-20);
+glEnd();
+glBegin(GL_POLYGON);//KANAN
+glColor3f(0,1,1);
+glVertex3f(-10,-10,-30);
+glVertex3f(-10,-40,-30);
+glVertex3f(-10,-40,-20);
+glVertex3f(-10,-10,-20);
+glEnd();
+
+//KAKI KURSI 2
+glBegin(GL_POLYGON);//ALAS BAWAH
+glColor3f(1,1,1);
+glVertex3f(-10,-40,-50);
+glVertex3f(-20,-40,-50);
+glVertex3f(-20,-40,-40);
+glVertex3f(-10,-40,-40);
+glEnd();
+glBegin(GL_POLYGON);//ALAS ATAS
+glColor3f(1,1,1);
+glVertex3f(-10,30,-50);
+glVertex3f(-20,30,-50);
+glVertex3f(-20,30,-40);
+glVertex3f(-10,30,-40);
+glEnd();
+glBegin(GL_POLYGON);//DEPAN
+glColor3f(0,0,1);
+glVertex3f(-10,30,-40);
+glVertex3f(-20,30,-40);
+glVertex3f(-20,-40,-40);
+glVertex3f(-10,-40,-40);
+glEnd();
+glBegin(GL_POLYGON);//BELAKANG
+glColor3f(0,0,1);
+glVertex3f(-10,30,-50);
+glVertex3f(-20,30,-50);
+glVertex3f(-20,-40,-50);
+glVertex3f(-10,-40,-50);
+glEnd();
+glBegin(GL_POLYGON);//KIRI
+glColor3f(0,1,1);
+glVertex3f(-10,30,-50);
+glVertex3f(-10,-40,-50);
+glVertex3f(-10,-40,-40);
+glVertex3f(-10,30,-40);
+glEnd();
+glBegin(GL_POLYGON);//KANAN
+glColor3f(0,1,1);
+glVertex3f(-20,30,-50);
+glVertex3f(-20,-40,-50);
+glVertex3f(-20,-40,-40);
+glVertex3f(-20,30,-40);
+glEnd();
+
+//KAKI KURSI 3
+glBegin(GL_POLYGON);//ALAS BAWAH
+glColor3f(1,1,1);
+glVertex3f(20,-40,-30);
+glVertex3f(10,-40,-30);
+glVertex3f(10,-40,-20);
+glVertex3f(20,-40,-20);
+glEnd();
+glBegin(GL_POLYGON);//DEPAN
+glColor3f(0,0,1);
+glVertex3f(20,-10,-20);
+glVertex3f(10,-10,-20);
+glVertex3f(10,-40,-20);
+glVertex3f(20,-40,-20);
+glEnd();
+glBegin(GL_POLYGON);//BELAKANG
+glColor3f(0,0,1);
+glVertex3f(20,-10,-30);
+glVertex3f(10,-10,-30);
+glVertex3f(10,-40,-30);
+glVertex3f(20,-40,-30);
+glEnd();
+glBegin(GL_POLYGON);//KIRI
+glColor3f(0,1,1);
+glVertex3f(20,-10,-30);
+glVertex3f(20,-40,-30);
+glVertex3f(20,-40,-20);
+glVertex3f(20,-10,-20);
+glEnd();
+glBegin(GL_POLYGON);//KANAN
+glColor3f(0,1,1);
+glVertex3f(10,-10,-30);
+glVertex3f(10,-40,-30);
+glVertex3f(10,-40,-20);
+glVertex3f(10,-10,-20);
+glEnd();
+
+//KAKI KURSI 2
+glBegin(GL_POLYGON);//ALAS BAWAH
+glColor3f(1,1,1);
+glVertex3f(10,-40,-50);
+glVertex3f(20,-40,-50);
+glVertex3f(20,-40,-40);
+glVertex3f(10,-40,-40);
+glEnd();
+glBegin(GL_POLYGON);//ALAS ATAS
+glColor3f(1,1,1);
+glVertex3f(10,30,-50);
+glVertex3f(20,30,-50);
+glVertex3f(20,30,-40);
+glVertex3f(10,30,-40);
+glEnd();
+glBegin(GL_POLYGON);//DEPAN
+glColor3f(0,0,1);
+glVertex3f(10,30,-40);
+glVertex3f(20,30,-40);
+glVertex3f(20,-40,-40);
+glVertex3f(10,-40,-40);
+glEnd();
+glBegin(GL_POLYGON);//BELAKANG
+glColor3f(0,0,1);
+glVertex3f(10,30,-50);
+glVertex3f(20,30,-50);
+glVertex3f(20,-40,-50);
+glVertex3f(10,-40,-50);
+glEnd();
+glBegin(GL_POLYGON);//KIRI
+glColor3f(0,1,1);
+glVertex3f(10,30,-50);
+glVertex3f(10,-40,-50);
+glVertex3f(10,-40,-40);
+glVertex3f(10,30,-40);
+glEnd();
+glBegin(GL_POLYGON);//KANAN
+glColor3f(0,1,1);
+glVertex3f(20,30,-50);
+glVertex3f(20,-40,-50);
+glVertex3f(20,-40,-40);
+glVertex3f(20,30,-40);
+glEnd();
+
+//SENDERAN KURSI
+glBegin(GL_POLYGON);//DEPAN
+glColor3f(0,0,1);
+glVertex3f(-10,30,-40);
+glVertex3f(-10,10,-40);
+glVertex3f(10,10,-40);
+glVertex3f(10,30,-40);
+glEnd();
+glBegin(GL_POLYGON);//BELAKANG
+glColor3f(0,0,1);
+glVertex3f(-10,30,-45);
+glVertex3f(-10,10,-45);
+glVertex3f(10,10,-45);
+glVertex3f(10,30,-45);
+glEnd();
+glBegin(GL_POLYGON);//ATAS
+glColor3f(1,1,1);
+glVertex3f(-10,30,-40);
+glVertex3f(-10,30,-45);
+glVertex3f(10,30,-45);
+glVertex3f(10,30,-40);
+glEnd();
+glBegin(GL_POLYGON);//BAWAH
+glColor3f(1,1,1);
+glVertex3f(-10,10,-40);
+glVertex3f(-10,10,-45);
+glVertex3f(10,10,-45);
+glVertex3f(10,10,-40);
+glEnd();
+
+
+glPushMatrix();
+glPopMatrix();
+glutSwapBuffers();
 }
 
 
-static void key(unsigned char key, int x, int y)
-{
-    switch (key)
-    {
-        case 27 :
-        case 'q':
-            exit(0);
-            break;
-
-        case '+':
-            slices++;
-            stacks++;
-            break;
-
-        case '-':
-            if (slices>3 && stacks>3)
-            {
-                slices--;
-                stacks--;
-            }
-            break;
-    }
-
-    glutPostRedisplay();
-}
-
-static void idle(void)
-{
-    glutPostRedisplay();
-}
-
-const GLfloat light_ambient[]  = { 0.0f, 0.0f, 0.0f, 1.0f };
-const GLfloat light_diffuse[]  = { 1.0f, 1.0f, 1.0f, 1.0f };
-const GLfloat light_specular[] = { 1.0f, 1.0f, 1.0f, 1.0f };
-const GLfloat light_position[] = { 2.0f, 5.0f, 5.0f, 0.0f };
-
-const GLfloat mat_ambient[]    = { 0.7f, 0.7f, 0.7f, 1.0f };
-const GLfloat mat_diffuse[]    = { 0.8f, 0.8f, 0.8f, 1.0f };
-const GLfloat mat_specular[]   = { 1.0f, 1.0f, 1.0f, 1.0f };
-const GLfloat high_shininess[] = { 100.0f };
-
-/* Program entry point */
-
-int main(int argc, char *argv[])
-{
-    glutInit(&argc, argv);
-    glutInitWindowSize(640,480);
-    glutInitWindowPosition(10,10);
-    glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH);
-
-    glutCreateWindow("GLUT Shapes");
-
-    glutReshapeFunc(resize);
-    glutDisplayFunc(display);
-    glutKeyboardFunc(key);
-    glutIdleFunc(idle);
-
-    glClearColor(1,1,1,1);
-    glEnable(GL_CULL_FACE);
-    glCullFace(GL_BACK);
-
-    glEnable(GL_DEPTH_TEST);
-    glDepthFunc(GL_LESS);
-
-    glEnable(GL_LIGHT0);
-    glEnable(GL_NORMALIZE);
-    glEnable(GL_COLOR_MATERIAL);
-    glEnable(GL_LIGHTING);
-
-    glLightfv(GL_LIGHT0, GL_AMBIENT,  light_ambient);
-    glLightfv(GL_LIGHT0, GL_DIFFUSE,  light_diffuse);
-    glLightfv(GL_LIGHT0, GL_SPECULAR, light_specular);
-    glLightfv(GL_LIGHT0, GL_POSITION, light_position);
-
-    glMaterialfv(GL_FRONT, GL_AMBIENT,   mat_ambient);
-    glMaterialfv(GL_FRONT, GL_DIFFUSE,   mat_diffuse);
-    glMaterialfv(GL_FRONT, GL_SPECULAR,  mat_specular);
-    glMaterialfv(GL_FRONT, GL_SHININESS, high_shininess);
-
+int main(int argc, char **argv){
+	glutInit(&argc, argv);
+	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);
+	glutInitWindowPosition(240, 80);
+    glutInitWindowSize(750, 600);
+    glutCreateWindow("MEJA DAN KURSI 3D");
+    myinit();
+    glutDisplayFunc(tampilan);
+	glutMouseFunc(mouse);
+	glutMotionFunc(mouseMotion);
+    glutReshapeFunc(ukur);
     glutMainLoop();
-
-    return EXIT_SUCCESS;
 }
-
